@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lag="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>JS最終課題</title>
+        <link rel="stylesheet" href="./css/style.css">
+        <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+        <script>
+            /* グローバル変数定義 */
+            var roulette_array = new Array; //ルーレット候補配列
+            var result_array = new Array;   //ルーレット結果配列
+            var roulette_value_before = "";
+            var interval_id = "";
+            var start_flg = false;  //ルーレットスタート管理フラグ
+            var max = 16;   //ルーレット最大値格納変数
+            var roulette_key = 0;   //ルーレットキー変数
+
+            $(document).ready(function(){
+                /* table要素生成 */
+                var cnt = 1;
+                for(var i = 1; i <= 4; i++){
+                    $('#roulette_table').append('<tr>');
+                    for(var j = 1; j <= 4; j++){
+                        $('#roulette_table tr:last').append('<th id="th_' + cnt + '">' + cnt + '</th>');
+                        cnt++;
+                    }
+                }
+                /* ルーレット候補配列生成 */
+                for(var i = 0; i < max; i++){
+                    roulette_array[i] = i + 1;
+                }
+                /* clickイベント追加 */
+                $('#bt_start').click(roulette_start);
+                $('#bt_stop').click(roulette_stop);
+                $('#bt_reset').click(roulette_reset);
+            });
+            
+            function roulette_start(){
+                /* 重複スタート回避 */
+                if(start_flg !== true){
+                    /* ルーレット結果存在チェック */
+                    if(result_array.length >= 1){
+                        /* 最終ルーレット結果のクラス入れ替え */
+                        $('#th_' + String(result_array[result_array.length - 1])).removeClass('roulette_loop_color');
+                        $('#th_' + String(result_array[result_array.length - 1])).addClass('roulette_result_color');
+                    }
+                    /* 検索結果要素数が変数max未満の場合ルーレット実行 */
+                    if(result_array.length < max){
+                        start_flg = true;  //flg起動
+                        
+                        /* ボタン暗転 */
+                        $('#bt_start').prop('disabled',true);
+                        $('#bt_stop').prop('disabled',false);
+                        $('#bt_reset').prop('disabled',true);
+                        
+                        interval_id = setInterval(roulette_loop, 100);
+                    }
+                }
+            }
+
+            function roulette_loop(){
+                /* 0~ルーレット候補配列要素数の中からランダム選出 */
+                roulette_key = Math.ceil(Math.random() * roulette_array.length) - 1;
+                var roulette_value = roulette_array[roulette_key];
+                
+                /* 対応クラスの変更 */
+                $('#th_' + roulette_value_before).removeClass('roulette_loop_color');
+                $('#th_' + roulette_value).addClass('roulette_loop_color');
+                
+                roulette_value_before = roulette_value; //結果値を前結果変数に保存
+            }
+            
+            function roulette_stop(){
+                /* フラグ起動時結果を格納 */
+                if(start_flg === true){
+                    start_flg = false;  //フラグ停止
+                    
+                    /* ボタン暗転 */
+                    $('#bt_start').prop('disabled',false);
+                    $('#bt_stop').prop('disabled',true);
+                    $('#bt_reset').prop('disabled',false);
+                    
+                    clearInterval(interval_id); //ループ停止
+                    
+                    /* ルーレット結果値を配列保存し、ルーレット候補配列から削除 */
+                    result_array.push(Number($('.roulette_loop_color').text()));
+                    roulette_array.splice(roulette_key,1);
+                }
+                /* 最終出目処理(※個人的に追記) */
+                if(result_array.length === max){
+                    $('#th_' + String(result_array[max-1])).removeClass('roulette_loop_color');
+                    $('#th_' + String(result_array[max-1])).addClass('roulette_result_color');
+                }
+            }
+            
+            function roulette_reset(){
+                clearInterval(interval_id); //ループ停止
+                start_flg = false;  //フラグ停止
+                
+                /* ボタン明暗切り替え */
+                $('#bt_reset').prop('disabled',true);
+
+                /* クラス、配列リセット */
+                $('th').removeClass('roulette_loop_color');
+                $('th').removeClass('roulette_result_color');
+                result_array = new Array;
+                
+                /* ルーレット候補配列再生成 */
+                for(var i = 0; i < max; i++){
+                    roulette_array[i] = i + 1;
+                }
+            }
+            
+        </script>
+    </head>
+    <body>
+        <table id="roulette_table">
+        </table>
+        <div id="button_area">
+            <input type="button" value="スタート" id="bt_start" class="style_button">
+            <input type="button" value="ストップ" id="bt_stop" class="style_button" disabled>
+            <input type="button" value="リセット" id="bt_reset" class="style_button" disabled>
+        </div>
+    </body>
+</html>
