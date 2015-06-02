@@ -4,7 +4,7 @@ table {
     margin: 80px auto 0px auto;
 }
 th {
-    font-size: 40px;
+    font-size: 20px;
     width: 80px;
     height: 80px;
     border-bottom: solid 2px;
@@ -20,7 +20,7 @@ th {
 }
 
 .roulette_loop_color {
-    background-color: #FF0;
+    background-color: #F00;
 }
 
 .roulette_result_color {
